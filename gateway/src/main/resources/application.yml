@@ -1,0 +1,54 @@
+
+okta:
+  oauth2:
+    issuer: https://dev-09093841.okta.com/oauth2/default
+    client-id: 0oa1sj3v4wEldUMc85d7
+    client-secret: AxL9KkZWIcld6V7H-rYZxF6fTk4HEwFz8GpOg7cN
+
+server:
+  port: 8080
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8083/eureka
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: DEBUG
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: matriculaModule
+          uri: lb://MATRICULA-SERVICE
+          predicates:
+            - Path=/api/matriculas/**
+
+        - id: personModule
+          uri: lb://PERSON-SERVICE
+          predicates:
+            - Path=/api/personas/**
+
+        - id: curseModule
+          uri: lb://MAIN-SERVICE
+          predicates:
+            - Path=/api/cursos/**
+
+        - id: subjectModule
+          uri: lb://MAIN-SERVICE
+          predicates:
+            - Path=/api/materias/**
+
+        - id: carrerModule
+          uri: lb://MAIN-SERVICE
+          predicates:
+            - Path=/api/carreras/**
+
+  application:
+    name: gateway
+
