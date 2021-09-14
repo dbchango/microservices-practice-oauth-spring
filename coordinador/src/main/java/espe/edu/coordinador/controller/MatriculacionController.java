@@ -41,6 +41,8 @@ public class MatriculacionController {
         if(!cursoService.existsByNrc(solicitudMatricula.getNrc_curso()))return  ResponseEntity.badRequest().body(new MessageResponse("El curso con el nrc: "+solicitudMatricula.getNrc_curso()+" no existe en la base de datos."));
 
         Persona persona = personaService.findByCedula(solicitudMatricula.getCedula_persona());
+        Curso curso = cursoService.findByNrc(solicitudMatricula.getNrc_curso());
+
         List<Matricula> matriculas = matriculaService.getPersonaMatriculas(persona.getId());
 
         int cuentasPendientes = 0;
@@ -50,7 +52,15 @@ public class MatriculacionController {
                 if(m.getCuenta().isEstado()==true) cuentasPendientes++;
             }
         }
-        return ResponseEntity.ok(persona.getApellidos());
+
+        // verificar que el numero de cuentas pendientes es 0 o el proceso no terminara
+        if(cuentasPendientes>0 ) return ResponseEntity.badRequest().body(new MessageResponse("La persona: "+persona.getApellidos()+" "+persona.getNombres()+"  tiene: "+cuentasPendientes+" cuentas pendientes"));
+        Matricula matricula = new Matricula();
+        matricula.setIdcurso(curso.getId());
+        matricula.setIdpersona(persona.getId());
+        matricula.setCuenta(null);
+        matricula = matriculaService.save(matricula);
+        return new ResponseEntity(new MessageResponse("La persona " + persona.getApellidos() + " " + persona.getNombres() + " se ha matriculado correctamente en el nrc: " + curso.getNrc() + "."), HttpStatus.CREATED);
     }
 
 }
